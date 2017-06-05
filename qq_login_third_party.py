@@ -330,6 +330,6 @@ class Login():
         return None
 if __name__=='__main__':
     proxy="117.41.155.120 65001 xiongmao xiongmao".split(' ')
-    user="530959754"
-    password="wangyk0915"
+    user="test"
+    password="ss"
     print Login(user,password,proxy,'tempuser','tempuser321').login()
