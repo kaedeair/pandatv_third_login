@@ -35,7 +35,7 @@ class Login():
     session=requests.Session()
 
     appid='716027609'
-    action='1-11-1496643053453'
+    action='5-3-1495966725481'
     loginjumpurl='https://graph.qq.com/oauth/login_jump'
     feedbackurl='http://support.qq.com/write.shtml?fid=780&SSTAG=www.panda.tv.appidself.client_id'
     def fetch(self, url, data=None, **kw):
@@ -106,16 +106,18 @@ class Login():
 
         self.loginurl2 = 'https://ssl.ptlogin2.qq.com/login'
         ticket=None
+        v1=None
         if v[0] == '1':  # 需要校验码
-            ticket = self.getVerifyCode(vcode)  # 获得校验码
+            ticket,vcode = self.getVerifyCode(vcode)  # 获得校验码
+            print ticket,vcode
         g = self.fetch(self.loginurl2, params={
             'u': self.user,
             'verifycode': vcode,
-            'pt_vcode_v1': 0,
+            'pt_vcode_v1': v[0],
             'pt_verifysession_v1': ticket or self.session.cookies['ptvfsession'],
             'p': self.pwdencode(vcode, uin, self.pwd),
-            'pt_randsalt': 0,
-            'pt_jstoken':'2811643906',
+            'pt_randsalt': 2 if v[0]=='1'else 0,
+            'pt_jstoken':'3681497418',
             'u1': self.loginjumpurl,
             'ptredirect': 0,
             'h': 1,
@@ -135,6 +137,7 @@ class Login():
         })
         v = re.findall('\'(.*?)\'', g.text)
         if v[0]!='0':
+            print v[4]
             return -2
         self.appsupporturl = 'https://graph.qq.com/oauth2.0/authorize'
 
@@ -323,13 +326,13 @@ class Login():
                            )
             result=json.loads(r.text)
             if result["errMessage"]=="OK":
-                return result["ticket"]
+                return result["ticket"],result["randstr"]
             else:
 
                 continue
         return None
 if __name__=='__main__':
-    proxy="117.41.155.120 65001 xiongmao xiongmao".split(' ')
-    user="test"
-    password="ss"
+    proxy="182.96.54.121 65001 xiongmao xiongmao".split(' ')
+    user="531158472"
+    password="wangyk09!5"
     print Login(user,password,proxy,'tempuser','tempuser321').login()

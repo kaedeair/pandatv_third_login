@@ -83,6 +83,7 @@ class MainWindow(QtGui.QDialog):
         self.ui.output.addItem(u'登录结束' )
         # self.ui.status.setText(u'批量登录完成')
     def logining_2(self,username,password,rk_username,rk_password):
+        print username,password,rk_username,rk_password
         self.ui.output.addItem(u'账号：%s正在登录' % username)
         if self.proxy_list is not None:
 
@@ -93,7 +94,10 @@ class MainWindow(QtGui.QDialog):
         else:
 
             proxy=None
-        result = Login(username, password,proxy,rk_username,rk_password).login()
+        try:
+            result = Login(username, password,proxy,rk_username,rk_password).login()
+        except:
+            result=-1
         if result ==-1:
             if proxy is None:
                 ip=u'本地IP'
@@ -118,7 +122,8 @@ class MainWindow(QtGui.QDialog):
             self.ui.output.addItem(u'账号：%s账号被回收' % username)
             return False
         self.ui.output.addItem(u'账号：%s登录成功' % username)
-        self.proxy_list.put(proxy)
+        if proxy is not None:
+            self.proxy_list.put(proxy)
         self.ui.result.append('----'.join([username, password, result]))
         return True
 
