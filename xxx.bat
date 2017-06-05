@@ -1,0 +1,1 @@
+pyuic4 untitled.ui -o UI.py
