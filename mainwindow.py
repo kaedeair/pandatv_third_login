@@ -82,10 +82,15 @@ class MainWindow(QtGui.QDialog):
         # self.logining_2(username,password,rk_username,rk_password)
         self.ui.output.addItem(u'登录结束' )
         # self.ui.status.setText(u'批量登录完成')
-    def logining_2(self,username,password,rk_username,rk_password):
+    def logining_2(self,username,password,rk_username,rk_password,retry=3,exist_proxy=None):
+        if retry ==0:
+            return False
         print username,password,rk_username,rk_password
         self.ui.output.addItem(u'账号：%s正在登录' % username)
-        if self.proxy_list is not None:
+        if exist_proxy is not None:
+            proxy=exist_proxy
+
+        elif self.proxy_list is not None:
 
             while True:
                 proxy =self.proxy_list.get()
@@ -96,8 +101,9 @@ class MainWindow(QtGui.QDialog):
             proxy=None
         try:
             result = Login(username, password,proxy,rk_username,rk_password).login()
-        except:
-            result=-1
+        except Exception,e:
+            print e.message
+            result=-4
         if result ==-1:
             if proxy is None:
                 ip=u'本地IP'
@@ -109,8 +115,12 @@ class MainWindow(QtGui.QDialog):
 
             return self.logining_2(username, password, rk_username, rk_password)
         if result ==-2:
-            self.ui.output.addItem(u'账号：%s密码错误' % username)
-            return False
+            if retry==1:
+                self.ui.output.addItem(u'账号：%s密码错误' % username)
+                return False
+            else:
+                return self.logining_2(username, password, rk_username, rk_password,retry-1,proxy)
+
         if result ==-3:
             self.ui.output.addItem(u'账号：%s密码错误' % username)
             return False

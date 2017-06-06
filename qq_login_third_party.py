@@ -44,6 +44,9 @@ class Login():
         else:
             kw['data'] = data
             func = self.session.post
+        if kw.get('headers') is None:
+            kw['headers']={}
+        kw['headers']['User-Agent']="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0"
 
         return func(url,proxies=self.proxy,verify=False, timeout=10,**kw)
 
@@ -64,7 +67,7 @@ class Login():
             pass
         else:
             return -1
-
+        # login_url="https://graph.qq.com/oauth/show?which=Login&display=pc&response_type=code&client_id=101343674&redirect_uri=https%3A%2F%2Fu.panda.tv%2Foauth_callback%3Fjp%3D%26redirect%3Dhttp%253A%252F%252Fwww.panda.tv%252Frucbind%253Fhref%253Dhttp%253A%252F%252Fwww.panda.tv%252F%26__plat%3Dpc_web%26plat%3Dpc_web%26__guid%3D96554777.1847601958869270500.1492410605735.9417%26guid%3D96554777.1847601958869270500.1492410605735.9417%26psrc%3D%26ip%3D115.55.203.18%26refer%3D%26pdft%3D%26pdftsrc%3D%257B%2522os%2522%253A%2522web%2522%252C%2522sessionId%2522%253A%25221496650458947-8936969%2522%252C%2522smid%2522%253A%2522070ef069-9910-4ea5-a3a8-d2b0da34c818%2522%252C%2522canvas%2522%253A%25227d2223610ce73aebea7dadbddc80da78%2522%252C%2522h%2522%253A1080%252C%2522ua%2522%253A%2522de392fc362e3bacf610ade71d0fb6ed1%2522%252C%2522w%2522%253A1920%257D%26__version%3D%26version%3D%26third%3D1%26type%3D4%26port%3D443%26method%3DGET%26csrfstate%3Dc52908e4fef11b998ded79c3a75fc0c0&scope=get_user_info"
         self.client_id = re.findall('&client_id=(.*?)\&', login_url)[0]
         self.redirect_url=urllib.unquote(re.findall('&redirect_uri=(.*?)\&', login_url)[0])
         print self.redirect_url
@@ -103,21 +106,22 @@ class Login():
         v = re.findall('\'(.*?)\'', g)
         vcode = v[1]
         uin = v[2]
+        print vcode,uin
 
         self.loginurl2 = 'https://ssl.ptlogin2.qq.com/login'
         ticket=None
         v1=None
         if v[0] == '1':  # 需要校验码
             ticket,vcode = self.getVerifyCode(vcode)  # 获得校验码
-            print ticket,vcode
+            # print ticket,vcode
         g = self.fetch(self.loginurl2, params={
             'u': self.user,
             'verifycode': vcode,
             'pt_vcode_v1': v[0],
             'pt_verifysession_v1': ticket or self.session.cookies['ptvfsession'],
             'p': self.pwdencode(vcode, uin, self.pwd),
-            'pt_randsalt': 2 if v[0]=='1'else 0,
-            'pt_jstoken':'3681497418',
+            'pt_randsalt': 0,#2 if v[0]=='1'else 2,
+            'pt_jstoken':'2811643906',
             'u1': self.loginjumpurl,
             'ptredirect': 0,
             'h': 1,
@@ -133,7 +137,7 @@ class Login():
             'aid': self.appid,
             'daia':383,
             'pt_3rd_aid': self.client_id,
-            'pt_guid_sig':self.session.cookies['pt_guid_sig']
+            # 'pt_guid_sig':'382CC819CE7C860C023B83C03FA9F856B7B63B552C19AA35147AC8E741EC2C07919BE1248C83045B' or self.session.cookies['pt_guid_sig']
         })
         v = re.findall('\'(.*?)\'', g.text)
         if v[0]!='0':
@@ -198,6 +202,7 @@ class Login():
         saltPwd = base64.b64encode(
             tea.encrypt(self.fromhex(pwd1), self.fromhex(s2))
         ).decode().replace('/', '-').replace('+', '*').replace('=', '_')
+        print saltPwd
         return saltPwd
 
     imgurl = 'https://ssl.captcha.qq.com/cap_union_new_gettype'
@@ -249,7 +254,6 @@ class Login():
 
             header_img={
                 "Connection": "keep-alive",
-                "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
                 "Accept": "image/webp,image/*,*/*;q=0.8",
                  "Accept-Encoding": "gzip, deflate, sdch, br",
             }
@@ -290,7 +294,7 @@ class Login():
             im = open(tmp[1], 'rb').read()
             result = rc.rk_create(im, 3040)
             ans=result['Result']
-            print result['Result']
+            # print result['Result']
 
 
             # ans = raw_input('Verify code: ')
@@ -332,7 +336,7 @@ class Login():
                 continue
         return None
 if __name__=='__main__':
-    proxy="182.96.54.121 65001 xiongmao xiongmao".split(' ')
-    user="531158472"
-    password="wangyk09!5"
+    proxy="42.239.225.235 38382 test 123456".split(' ')
+    user="xxx"
+    password="xxx"
     print Login(user,password,proxy,'tempuser','tempuser321').login()
